@@ -1,0 +1,366 @@
+show dbs --> used to show all dbs
+show collections --> used to show all collections
+use test --> used to test DB
+
+db.carData.aggregate(
+[
+    {
+        $group : {_id : "$model"
+        }
+    },
+    {
+        $sort : {model : 1
+        }
+    }
+]
+)
+
+db.carData.aggregate(
+[
+    {
+        $group : {_id : "$brand",TotalCars : {$sum : 1
+            }
+        }
+    }
+]
+)
+
+db.carData.aggregate([
+    {
+        $group : {_id : "$brand",TotalAvg : {$avg : price
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $group : {_id : "$electric",TotalCars : {$sum : 1
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {$match : {
+            "specifications.engine": "Electric",
+            "specifications.horsepower": {$gte : 200
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+    $match : {
+            "specifications.engine": "Electric"
+        }
+    },
+    {$count : "total_electric_cars"
+    }
+])
+
+db.carData.aggregate([
+    {
+        $match : {maker : "Hyundai"
+        }
+    },
+    {$group : {_id : "$fuel_type",totalCars : {$sum : 1
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $match : {maker : "Hyundai"
+        }
+    },
+    {$project : {_id  : 0,model : 1,brand : 1,price : 1
+        }
+    }
+])
+
+db.carData.aggregate([
+    {$match : {fuel_type : "Petrol"
+        }
+    },
+    {$project : {model : 1, _id : 0, maker : 1, fuel_type : 1
+        }
+    },
+    {$sort : {model : 1
+        }
+    }
+])
+
+db.carData.aggregate([
+    {$sortByCount : "$model"
+    }
+])
+
+db.carData.aggregate([
+    {
+        $match : {maker : "Hyundai"
+        }
+    },
+    {
+        $unwind : "$owners"
+    }
+])
+
+db.carData.aggregate([
+    {
+        $match : {maker : "Hyundai"
+        }
+    },
+    {
+        $project : {
+            carModel : {$toUpper : {$concat : [
+                        "$maker",
+                        " ",
+                        "$model"
+                    ]
+                }
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {$project : {
+        _id : 0, model : 1,
+        is_diesel : {
+        $regexMatch : {
+            input : "$fuel_type",
+            regex : "Die"
+                }
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $match : {maker : "Hyundai"
+        }
+    },
+    {
+        $project : {model : 1,_id: 0,maker : 1,price : 1, owners : 1
+        }
+    },
+    {$out : "hyundai_cars"
+    }
+])
+
+db.carData.aggregate([
+    {
+        $project : {sum : {$add : [
+                    2,
+                    4,
+                    6
+                ]
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $project : {model : 1, price : {$add : [
+                    55000,
+                    "$price"
+                ]
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $project : {model : 1,price : 1,_id : 0
+        }
+    },
+    {$addFields : {price_in_lakhs : {$divide : [
+                    "$price",
+                    100000
+                ]
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+            $project : {model : 1,_id : 0, price : 1
+        }
+    },
+    {
+            $set : {price_in_lakhs : {$round : [
+                    {$divide : [
+                            "$price",
+                            50000
+                        ]
+                    },
+                    2
+                ]
+            }
+        }
+    }
+])
+
+    db.carData.aggregate([
+    {
+            $match : {maker : "Hyundai"
+        }
+    },
+    {
+        $addFields : {total_service_cost : { $sum : "$service_history.cost"
+            }
+        }
+    },
+    {
+            $project : {model : 1,total_service_cost : 1,price: 1, _id: 0,maker : 1,service_history: 1
+        }
+    }
+])
+
+db.carData.aggregate([
+    {$project : {model : 1,fuel_type : 1,maker  : 1,_id: 0, 
+    fuelCategory : {
+        $cond : {
+            if : {
+                $eq : [
+                            "$fuel_type",
+                            "Petrol"
+                        ]
+                    },
+                then : "Petrol Car",
+            else : "Non Petrol Car"
+                },
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $project : {model: 1,maker: 1,_id: 0,price: 1,
+        priceCategory : {
+            $switch : {
+                branches: [
+                        {
+                    case : {$lt : [
+                                    "$price",
+                                    500000
+                                ]
+                            },
+                    then : "Budget"
+                        },
+                        {
+                    case : {$and : [
+                                    {$gte : [
+                                            "$price",
+                                            50000
+                                        ]
+                                    },
+                                    {$lt : [
+                                            "$price",
+                                            1000000
+                                        ]
+                                    }
+                                ]
+                            },
+                    then : "Mid Range"
+                        },
+                        {
+                    case : {$gte : [
+                                    "$price",
+                                    1000000
+                                ]
+                            },
+                    then : "Premium"
+                        }
+                    ],
+            default : "Unknown"
+                }
+            }
+        }
+    },
+])
+
+db.carData.aggregate([
+    {
+        $project : {model: 1,maker: 1,_id: 0,
+        newDate : {$dateAdd : {startDate : new Date(),unit: "month",amount: 3
+                }
+            }
+        }
+    }
+])
+
+db.carData.aggregate([
+    {
+        $project : {model: 1,_id : 0, todayDate : "$$NOW"
+        }
+    }
+])
+
+
+// Variables
+
+System generated Variable Examples : "$$NOW"
+User Defined variables :
+example :
+price = 1500000 or filter = {price : 1500000
+}
+
+Object.Keys(this) --> used to show all variables
+
+// Join
+
+db.users.aggregate([
+    {
+        $lookup : {
+            "from": "orders",
+            "localField": "_id",
+            "foreignField": "user_id",
+            "as": "orders"
+        }
+    }
+])
+
+// Schema Validations
+
+db.createCollection("user2",
+{
+    validator : {
+        $jsonSchema : {
+            bsonType : "object",
+            required : [
+                "name",
+                "phone"
+            ]
+        },
+        properties : {
+            name: {
+                bsonType : "string",
+                description : "name should must be string"
+            },
+            phone : {
+                bsonType : "string",
+                description : "name should must be string"
+            }
+        }
+    },
+    validationLevel : "strict",
+validationAction : "error"
+}
+)
+
+// Indexes
+
+db.cars.createIndex({maker : 1})
+db.cars.createIndex({model : 1},{unique:true})
+db.car.dropIndex("maker_1")
+db.cars.getIndexes()
+db.movies.find({title:"The Great Train Robbery"}).explain("executionStats")
