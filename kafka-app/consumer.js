@@ -1,0 +1,18 @@
+import kafka from "./client.js";
+const group = process.argv[2];
+
+async function init() {
+    // const consumer = kafka.consumer({groupId:"user-1"});
+ const consumer = kafka.consumer({groupId:group});
+    await consumer.connect();
+    console.log("Consumer connected successfully!");
+    await consumer.subscribe({ topics: ["rider-updates"],fromBeginning:true });
+
+    await consumer.run({
+        eachMessage: async ({ topic, partition, message }) => {
+            console.log(`${group} [${topic}]:PART:${partition} : ${message.value.toString()}`);
+        }
+    })
+}
+
+init()
