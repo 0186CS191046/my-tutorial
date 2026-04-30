@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+</head>
+
+<body>
+    <div>
+        <form style="border:1px solid #ccc">
+            <div class="container">
+                <h1>Sign Up</h1>
+                <p>Please fill in this form to create an account.</p>
+                <hr>
+                <label for="firstName"><b>FirstName</b></label>
+                <input id="firstName" type="text" placeholder="Enter FirstName" name="firstName" required>
+
+                <label for="lastName"><b>LastName</b></label>
+                <input id="lastName" type="text" placeholder="Enter LastName" name="lastName" required>
+
+                <label for="email"><b>Email</b></label>
+                <input id="email" type="text" placeholder="Enter Email" name="email" required>
+
+                <label for="psw"><b>Password</b></label>
+                <input type="password" placeholder="Enter Password" name="psw" id="psw" required>
+
+                <label for="phone"><b>Phone</b></label>
+                <input type="number" placeholder="Enter Number..." name="phone" id="phone" required>
+
+
+                <p>By creating an account you agree to our <a href="#" style="color:dodgerblue">Terms & Privacy</a>.</p>
+
+                <div class="clearfix">
+                    <button type="submit" class="signupbtn">Sign Up</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+
+        const signUpBtn = document.querySelector(".signupbtn");
+
+        signUpBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            const email = document.getElementById("email").value;
+            const firstName = document.getElementById("firstName").value;
+            const lastName = document.getElementById("lastName").value;
+            const phone = document.getElementById("phone").value;
+            const password = document.getElementById("psw").value;
+
+
+            console.log("+========", email, firstName, lastName);
+
+            const payload = {
+                "firstName": firstName, "lastName": lastName,
+                "email": email,
+                "phone": phone,
+                "password": password
+            }
+
+            console.log("payload-----", payload);
+
+            try {
+                const res = await fetch("http://localhost:5001/register", {
+                    method: "POST",
+                    headers:{"Content-Type":"application/json"},
+                    body: JSON.stringify(payload)
+                })
+                console.log("______",res.data);
+                
+                if(res.ok){
+                    window.location.href = "http://localhost:5001/signin.html"
+                }
+            } catch (error) {
+                console.error("Error in registering user...", error);
+            }
+        })
+    </script>
+</body>
+
+</html>
