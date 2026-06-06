@@ -1,0 +1,27 @@
+{
+    "aggregate": "notifications",
+    "pipeline": [
+        {
+            "$match": {
+                "user": {
+                    "$oid": "?"
+                },
+                "isDeleted": "?"
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "$numberInt": "?"
+                },
+                "n": {
+                    "$sum": {
+                        "$numberInt": "?"
+                    }
+                }
+            }
+        }
+    ],
+    "cursor": {},
+    "$db": "v-pop-api"
+}
